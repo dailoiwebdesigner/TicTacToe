@@ -1,357 +1,451 @@
-# TicTacToe
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package Test_Case;
+package ttt;
 
-import java.io.*;
-import java.util.*;
+import java.awt.Button;
+import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 
-public class TicTacToe {
-	
-	public static int INFINITY = 100;
-	public TicTacToe() {}
-	public Node initializeNode() {
-		return new Node(); 
-	}
-//        public ten rot(){
-//            return new ten();
+public class TicTacToe extends JFrame implements ActionListener{
+    
+    public String first_Click;
+    public int dem = 0;
+    public int kq = 1;
+    public int trangthai = 0;
+    public JButton btn = new JButton();
+    AI ai = new AI();
+    //JButton btn = new JButton();
+    //JButton btn = new JButton();
+    //Button pnlbtn = new Button();
+    
+//    for(int y = 1; y <= 9; y++){
+//        buttons[y] = new JButton("");
+//        pnlbtn.add(button[i]);
+//    }
+//    pnlbtn.setLayout(new GridLayout(3, 3));
+//    for(int i=0;i<=8;i++){
+//        buttons[i]=new JButton("");
+//        pnlbtn.add(buttons[i]);
+//        buttons[i].setBackground(SystemColor.menu);
+//        buttons[i].addActionListener(this);
+//    }
+    
+
+
+    
+
+    private final JButton btn1 = new JButton();
+    private final JButton btn2 = new JButton();
+    private final JButton btn3 = new JButton();
+    private final JButton btn4 = new JButton();
+    private final JButton btn5 = new JButton();
+    private final JButton btn6 = new JButton();
+    private final JButton btn7 = new JButton();
+    private final JButton btn8 = new JButton();
+    private final JButton btn9 = new JButton();
+    
+    
+    public TicTacToe(){
+        
+//        for(int i = 1; i <= 3; i++){
+//        for(int j = 1; j <=3; j++){
+//            btn[i][j] = new JButton();
+//       }
+//    }
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  // cửa sổ bật tắt trên giao diện
+        setSize(600, 600);                               
+        setLayout(new GridLayout(3,3));                  
+        setLocationRelativeTo(null);                     // khi build lên thì ngay vị trí giữa màn hình
+        setVisible(true);                                // Đk để của sổ được hiện
+        
+        // đưa button ra màn hình
+        add(btn1);
+        add(btn2);
+        add(btn3);
+        add(btn4);
+        add(btn5);
+        add(btn6);
+        add(btn7);
+        add(btn8);
+        add(btn9);
+        
+        
+        
+        //tạo sự kiện cho button
+        btn1.addActionListener(this);
+        btn2.addActionListener(this);
+        btn3.addActionListener(this);
+        btn4.addActionListener(this);
+        btn5.addActionListener(this);
+        btn6.addActionListener(this);
+        btn7.addActionListener(this);
+        btn8.addActionListener(this);
+        btn9.addActionListener(this);
+        
+    }
+//    public void luotDanh(String first_Click){
+//        if(first_Click == "X"){
+//            first_Click  = "O";
 //        }
-	public Node initializeNodeWithInput(String[][] board) {
-		Node root = new Node();
-		root.board = board;
-		root.nextPlayer = "X";	//Always initialize machine as X node.
-		return root;
-	}
-	/*
-	 * Input from file, Output board to console.
-	 */
-	public String[][] readBoardFromFile(String inputFileName) throws IOException{
-		File inputFile = new File(inputFileName);
-		BufferedReader bufferedReader = new BufferedReader(new FileReader(inputFile));
-		String[][] board = new String[3][3];
-		String inputLine;
-		for(int line = 0; ((inputLine = bufferedReader.readLine()) != null); line++) 
-			board = this.addInputLineToRow(line, board, inputLine);
-		return board;
-	}
-	public String[][] addInputLineToRow (int row, String[][] boardAtRow, String inputLine){
-		char aChar; int column = 0;
-		for(int index = 0; index < inputLine.length();index= index+2) {
-			aChar = inputLine.charAt(index);
-			if(aChar == ' ') { boardAtRow[row][column] = null; column++;}
-			else { boardAtRow[row][column] = Character.toString(aChar); column++;}
-		}
-		return boardAtRow;
-	}
-	// Output game board
-	public void outputBoard(String[][] board) { 
-		int boardSize = board.length;
-		System.out.println("Current Board is: ");
-		System.out.print("-------------");
-		System.out.println();
-		for(int row = 0; row < boardSize; row++) {
-			System.out.print("|");
-			for(int column = 0; column < boardSize; column++) {
-				if(board[row][column] == null) System.out.print("  "+" |");
-				else System.out.print(" "+board[row][column] +" |");
-			}
-			System.out.println();
-			System.out.print("-------------"); 
-			System.out.println();
-		}
-	}	
-	//Check leaf node
-	public boolean isLeafNode(Node currentNode) {
-		return this.checkWin(currentNode) || (this.scanEmptySquareOnBoard(currentNode)==null);
-	}
-	// Only evaluate heuristicValue at leafNode.
-	public int evaluateHeuristicValue(Node currentNode) {
-		if(currentNode.nextPlayer == "X" && this.checkWin(currentNode)==true) return -1;
-		if(currentNode.nextPlayer == "O" && this.checkWin(currentNode)==true) return 1;
-		return 0;
-	}
-	// Checking winning node
-	public boolean checkWin(Node currentNode) {
-		return (this.checkWinOnRow(currentNode)
-				||this.checkWinOnColumn(currentNode)
-				||this.checkWinOnDiagonal(currentNode));
-	}
-	public boolean checkWinOnRow(Node currentNode) {
-		for(int row = 0; row < currentNode.board.length; row++) {
-			int timesOfNodeRepeated = 0;
-			String scanForElement = currentNode.board[row][0];
-			if (scanForElement == null) break;
-			for(int column = 1; column < currentNode.board.length; column ++) {
-				String nextString = currentNode.board[row][column];
-				if(nextString == null) break;
-				else if (scanForElement.contentEquals(nextString) == false) break;
-					else timesOfNodeRepeated++;
-			}
-			if(timesOfNodeRepeated == 2) return true;
-		}
-		return false;
-	}
-	public boolean checkWinOnColumn(Node currentNode) {
-		for(int column = 0; column < currentNode.board.length; column++) {
-			int timesOfNodeRepeated = 0;
-			String scanForElement = currentNode.board[0][column];
-			if (scanForElement == null) break;
-			for(int row = 1; row < currentNode.board.length; row ++) {
-				String nextString = currentNode.board[row][column];
-				if(nextString == null) break;
-				else if (scanForElement.contentEquals(nextString) == false) break;
-					else timesOfNodeRepeated++;
-			}
-			if(timesOfNodeRepeated == 2) return true;
-		}
-		return false;
-	}
-	public boolean checkWinOnDiagonal(Node currentNode) {
-		String[][] aBoard = currentNode.board;
-		if(aBoard[1][1] != null) {
-			if(aBoard[0][0] != null && aBoard[2][2] != null) return this.checkWinOnLeftDiagonal(currentNode);
-			else if(aBoard[0][2] != null && aBoard[2][0] != null) return this.checkWinOnRightDiagonal(currentNode);	
-			else return false;
-		}
-		else return false;
-	}
-	public boolean checkWinOnLeftDiagonal(Node currentNode) {
-		String[][] aBoard = currentNode.board;
-		return (aBoard[1][1].contentEquals(aBoard[0][0]) && aBoard[1][1].contentEquals(aBoard[2][2]));
-	}
-	public boolean checkWinOnRightDiagonal(Node currentNode) {
-		String[][] aBoard = currentNode.board;
-		return (aBoard[1][1].contentEquals(aBoard[0][2]) && aBoard[1][1].contentEquals(aBoard[2][0]));
-	}
-	public int[] scanEmptySquareOnBoard(Node currentNode) {
-		int boardSize = currentNode.board.length;
-		for(int row = 0; row < boardSize; row++) {
-			for(int column = 0; column < boardSize; column++) {
-				if(currentNode.board[row][column] == null) return this.addValueToArray(row, column);
-			}
-		}
-		return null;
-	}
-	public ArrayList<int[]> scanAllEmptySquareOnBoard(Node currentNode) {
-		int boardSize = currentNode.board.length;
-		ArrayList<int[]> anArrayList = new ArrayList<int[]>();
-		for(int row = 0; row < boardSize; row++) {
-			for(int column = 0; column < boardSize; column++) {
-				if(currentNode.board[row][column] == null) anArrayList.add(this.addValueToArray(row, column));
-			}
-		}
-		return anArrayList;
-	}
-	public int[] addValueToArray(int aNumber, int anotherNumber) {
-		int[] anArray = new int[2];
-		anArray[0] = aNumber;
-		anArray[1] = anotherNumber;
-		return anArray;
-	}
-	public String[][] copyBoard(String[][] aBoard) {
-		int boardSize = aBoard.length;
-		String[][] newBoard = new String[boardSize][boardSize];
-		for(int row = 0; row < boardSize; row++) {
-			for(int column = 0; column < boardSize; column++) 
-				newBoard[row][column] = aBoard[row][column];
-		}
-		return newBoard;
-	}
-	public String[][] updateBoard(Node currentNode, int[] emptySquareOnBoard) {
-		String[][] newBoard = this.copyBoard(currentNode.board);
-		newBoard[emptySquareOnBoard[0]][emptySquareOnBoard[1]] = currentNode.nextPlayer;
-		return newBoard;
-	}
-	public Node getSuccessor(Node currentNode, int[] emptySquareOnBoard) {
-		if(this.isLeafNode(currentNode) == true) return null;
-		else {
-			if(currentNode.nextPlayer=="X") return new Node(this.updateBoard(currentNode,emptySquareOnBoard),currentNode,this.evaluateHeuristicValue(currentNode),currentNode.atDepth+1,"O");
-			else return new Node(this.updateBoard(currentNode,emptySquareOnBoard),currentNode,this.evaluateHeuristicValue(currentNode),currentNode.atDepth+1,"X");
-		}
-	}
-	public Vector<Node> getAllSuccessors(Node currentNode) {
-		Vector<Node> allSuccessors = new Vector<Node>();
-		ArrayList<int[]> allEmptySquareOnBoard = this.scanAllEmptySquareOnBoard(currentNode);
-		int numberOfEmptySquareOnBoard = allEmptySquareOnBoard.size();
-		for(int i = 0; i < numberOfEmptySquareOnBoard; i++) { 
-			allSuccessors.add(this.getSuccessor(currentNode, allEmptySquareOnBoard.get(i))); 
-		}
-		return allSuccessors;
-	}
-	/*
-	 * Get max/min.
-	 */
-	public int getMaxTwoIntegers(int anInteger, int anotherInteger) {
-		if(anInteger < anotherInteger) return anotherInteger;
-		else return anInteger;
-	}
-	public int getMinTwoIntegers(int anInteger, int anotherInteger) {
-		if(anInteger > anotherInteger) return anotherInteger;
-		else return anInteger;
-	}
-	public Node getMinNodeInList(Vector<Node> aVectorNode) {
-		Node minNode = aVectorNode.get(0);
-		int listSize = aVectorNode.size();
-		for(int index = 0; index < listSize; index++) 
-			if(minNode.heuristicValue > aVectorNode.get(index).heuristicValue) minNode = aVectorNode.get(index);
-		return minNode;
-	}
-	public Node getMaxNodeInList(Vector<Node> aVectorNode) {
-		Node maxNode = aVectorNode.get(0);
-		int listSize = aVectorNode.size();
-		for(int index = 0; index < listSize; index++) 
-			if(maxNode.heuristicValue < aVectorNode.get(index).heuristicValue) maxNode = aVectorNode.get(index);
-		return maxNode;
-	}
-	/*
-	 * Minimax
-	 */
-	Vector<Node> possibleNextMoveNodes = new Vector<Node>();
-	public int getMinimax(Node currentNode) {
-		if(this.isLeafNode(currentNode)==true) return this.miniMaxLeafNode(currentNode);
-		else return this.miniMaxNonLeafNode(currentNode);
-	}
-	public int miniMaxNonLeafNode(Node currentNode) {
-		Vector<Node> allSuccessors = this.getAllSuccessors(currentNode);
-		for(int atIndex = 0; atIndex < allSuccessors.size(); atIndex++) {
-			Node aSuccessor = allSuccessors.get(atIndex);
-			if(currentNode.nextPlayer == "O") currentNode.heuristicValue = this.getMinTwoIntegers(currentNode.heuristicValue, this.getMinimax(aSuccessor));
-			else currentNode.heuristicValue = this.getMaxTwoIntegers(currentNode.heuristicValue, this.getMinimax(aSuccessor));	
-		}
-		if(this.possibleNextMoveNodes(currentNode)!=null) possibleNextMoveNodes.add(currentNode);
-		return currentNode.heuristicValue;
-	}
-	public int miniMaxLeafNode(Node currentNode){
-		if(this.possibleNextMoveNodes(currentNode)!=null) possibleNextMoveNodes.add(currentNode);
-		return this.evaluateHeuristicValue(currentNode);
-	}
-	
-	/*
-	 * Alpha-beta pruning.
-	 */
-	public int initializeAlpha(Node currentNode) {
-		if(this.isLeafNode(currentNode)==true) return this.evaluateHeuristicValue(currentNode);
-		else return -INFINITY;
-	}
-	public int initializeBeta(Node currentNode) {
-		if(this.isLeafNode(currentNode)==true) return this.evaluateHeuristicValue(currentNode);
-		else return INFINITY;
-	}
-	public int minimaxAlphaBetaPruning(Node currentNode, int alpha, int beta) {
-		int alphaOfCurrentNode = alpha; int betaOfCurrentNode = beta;
-		if (this.isLeafNode(currentNode)==true)  return this.miniMaxLeafNode(currentNode);
-		else if (currentNode.nextPlayer == "O") return this.minimaxAlpha_CurrentMaxNode(currentNode, alphaOfCurrentNode, betaOfCurrentNode);
-		else return this.minimaxBeta_CurrentMinNode(currentNode, alphaOfCurrentNode, betaOfCurrentNode);
-	}
-	public int minimaxAlpha_CurrentMaxNode(Node currentNode, int alphaOfCurrentNode, int betaOfCurrentNode) {
-		Vector<Node> allSuccessors = this.getAllSuccessors(currentNode);
-		for(int atIndex = 0; atIndex < allSuccessors.size(); atIndex++) {
-			Node aSuccessor = allSuccessors.get(atIndex);
-			int currentMin = this.minimaxAlphaBetaPruning(aSuccessor, alphaOfCurrentNode, betaOfCurrentNode);
-			betaOfCurrentNode = this.getMinTwoIntegers(betaOfCurrentNode, currentMin);
-			currentNode.heuristicValue = this.getMinTwoIntegers(currentNode.heuristicValue, betaOfCurrentNode);
-			if(alphaOfCurrentNode >= betaOfCurrentNode) break;
-		}
-		if(this.possibleNextMoveNodes(currentNode)!=null) possibleNextMoveNodes.add(currentNode);
-		return betaOfCurrentNode;	
-	}
-	public int minimaxBeta_CurrentMinNode(Node currentNode, int alphaOfCurrentNode, int betaOfCurrentNode) {
-		Vector<Node> allSuccessors = this.getAllSuccessors(currentNode);
-		for(int atIndex = 0; atIndex < allSuccessors.size(); atIndex++) {
-			Node aSuccessor = allSuccessors.get(atIndex);
-			int currentMax = this.minimaxAlphaBetaPruning(aSuccessor, alphaOfCurrentNode, betaOfCurrentNode);
-			alphaOfCurrentNode = this.getMaxTwoIntegers(alphaOfCurrentNode, currentMax);
-			currentNode.heuristicValue = this.getMaxTwoIntegers(currentNode.heuristicValue,alphaOfCurrentNode);
-			if(alphaOfCurrentNode >= betaOfCurrentNode) break;
-		}
-		if(this.possibleNextMoveNodes(currentNode)!=null) possibleNextMoveNodes.add(currentNode);
-		return alphaOfCurrentNode;
-	}
-	
-	// Get next move
-	public Node possibleNextMoveNodes (Node currentNode) {
-		if(currentNode.atDepth == 1) return currentNode;
-		else return null;
-	}
-	public Node nextNodeToMove(Node currentNode) {
-		//this.getMinimax(currentNode);		// Change this to see how different between two algorithms.
-		this.minimaxAlphaBetaPruning(currentNode, this.initializeAlpha(currentNode), this.initializeBeta(currentNode));
-		Node newNode = this.getMaxNodeInList(possibleNextMoveNodes);
-		possibleNextMoveNodes.removeAllElements();
-		return newNode;
-	}	
-	/*
-	 * Game playing
-	 */
-	public void humanMove(Node currentNode) {
-		Node newNode = new Node();
-		int[] humanInput = this.getCorrectInputFromHumanMove(currentNode);
-		newNode = this.getSuccessor(currentNode, humanInput);
-		this.outputBoard(newNode.board);
-		if(this.checkWin(newNode)==true) System.out.println("Congratulations. You won!");
-		else if(this.isLeafNode(newNode) == true)  System.out.println("The game is draw");
-		else this.machineMove(newNode);
-	}
-	public void machineMove(Node currentNode) {
-		Node newNode = this.initializeNodeWithInput(currentNode.board);
-		newNode = this.nextNodeToMove(newNode);
-		this.outputBoard(newNode.board);
-		if(this.checkWin(newNode) == true) System.out.println("Computer won!");
-		else if(this.isLeafNode(newNode) == true)  System.out.println("The game is draw");
-		else this.humanMove(newNode);
-	}
-	public void gamePlay() {
-		Node root = this.initializeNode();
-		this.outputBoard(root.board);
-		int player = this.getPlayer();
-		if(player == 1) { root.nextPlayer = "O"; this.humanMove(root); }
-		else { root.nextPlayer = "X"; this.machineMove(root); }
-	}
-	/*
-	 * Extra-method
-	 */
-	public int getPlayer(){
-		Scanner player = new Scanner(System.in);
-		System.out.print("Do you want to play first? Yes (1). No (0): ");
-		return player.nextInt();
-	}
-	public int[] getCorrectInputFromHumanMove(Node currentNode) {
-		int[] humanInput = this.readHumanInput();
-		while(humanInput[0] >= 3 || humanInput[0] < 0
-				|| humanInput[1] >= 3 || humanInput[1] < 0
-				|| this.checkEmptySquareFromHumanInput(currentNode, humanInput)==false) {
-			System.out.println("Sorry. Your move is not correct.");
-			humanInput = this.readHumanInput();
-		}
-		return humanInput;
-	}
-	public boolean checkEmptySquareFromHumanInput(Node currentNode, int[] humanInput) {
-		return currentNode.board[humanInput[0]][humanInput[1]] == null;
-	}
-	public int[] modifyHumanInput(int[] humanInput) {
-		int[] returnFromHumanInput = new int[2];
-		returnFromHumanInput[0] = humanInput[0]-1;
-		returnFromHumanInput[1] = humanInput[1]-1;
-		return returnFromHumanInput;
-	}
-	public int[] readHumanInput() {
-		int[] humanInput = new int[2];
-		Scanner row = new Scanner(System.in); Scanner column = new Scanner(System.in);
-		System.out.print("Enter which row you want to check: "); 
-		humanInput[0] = row.nextInt();
-		System.out.print("Please enter column you want to check: "); 
-		humanInput[1] = column.nextInt();
-		return this.modifyHumanInput(humanInput);
-	}
-	
-	public static void main(String args[]) throws IOException {
-		TicTacToe aTicTacToe = new TicTacToe();
-		//String[][] aBoard = aTicTacToe.readBoardFromFile("/Users/khoapham/Dropbox/Developer/TicTacToe/Testcase/inputBoard_1.txt");
-		aTicTacToe.gamePlay();
-	}
+//        else first_Click = "X";
+//    }
+    
+          
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        
+        /*
+        Phần này để đếm xem: nếu số chẵn thì X đánh, nếu số lẻ thì O đánh 
+        */
+       if(trangthai == 0){
+            if(e.getSource() == btn1){
+            //System.out.println("x: "+btn1.getX()+"    y:"+ btn1.getY());
+            btn1.setText("X");      // Xét quân cờ xem đánh X hay O
+            ai.mang[0][0] = 1;
+            btn1.setEnabled(false);         // Sau khi đánh thì xét cho button tắt để không thể nhấn lần 2
+            winGame();                      // kiểm tra X hay O win hay hòa cờ 
+            //inmang();
+            
+        }
+        if(e.getSource() == btn2){
+            //System.out.println("x: "+btn2.getX()+"    y:"+ btn2.getY());
+
+            btn2.setText("X");
+            ai.mang[0][1] = 1;
+            btn2.setEnabled(false);
+            winGame();
+
+            //inmang();
+        }
+        if(e.getSource() == btn3){
+            //System.out.println("x: "+btn3.getX()+"    y:"+ btn3.getY());
+
+            btn3.setText("X");
+            ai.mang[0][2] = 1;
+            btn3.setEnabled(false);
+            winGame();
+            //inmang();
+        }
+        if(e.getSource() == btn4){
+            //System.out.println("x: "+btn4.getX()+"    y:"+ btn4.getY());
+
+            btn4.setText("X");
+            ai.mang[1][0] = 1;
+            btn4.setEnabled(false);
+            winGame();
+            //inmang();
+        }
+        if(e.getSource() == btn5){
+            //System.out.println("x: "+btn5.getX()+"    y:"+ btn5.getY());
+
+            btn5.setText("X");
+            ai.mang[1][1] = 1;
+            btn5.setEnabled(false);
+            winGame();
+            //inmang();
+        }
+        if(e.getSource() == btn6){
+        //System.out.println("x: "+btn6.getX()+"    y:"+ btn6.getY());
+
+            btn6.setText("X");
+            ai.mang[1][2] = 1;
+            btn6.setEnabled(false);
+            winGame();
+            //inmang();
+        }
+        if(e.getSource() == btn7){
+            //System.out.println("x: "+btn7.getX()+"    y:"+ btn7.getY());
+            btn7.setText("X");
+            ai.mang[2][0] = 1;
+            btn7.setEnabled(false);
+            winGame();
+            //inmang();
+            //btn7.setEnabled(true);
+        }
+        if(e.getSource() == btn8){
+            //System.out.println("x: "+btn8.getX()+"    y:"+ btn8.getY());
+            btn8.setText("X");
+            ai.mang[2][1] = 1;
+            btn8.setEnabled(false);
+            winGame();
+            //inmang();
+        }
+        if(e.getSource() == btn9){
+            //System.out.println("x: "+btn9.getX()+"    y:"+ btn9.getY());
+            btn9.setText("X");
+            ai.mang[2][2] = 1;
+            btn9.setEnabled(false);
+            winGame();
+            //inmang();
+
+        }
+        if( kq != 0){
+            ai.giaTri_totNhat = 100;
+            ai.Cat_tia(0, -10, ai.giaTri_O);
+            if(ai.PointAI.x == 0 && ai.PointAI.y == 0){
+                btn1.setText("O");
+                btn1.setEnabled(false);
+                ai.mang[ai.PointAI.x][ai.PointAI.y] = ai.giaTri_O;
+                winGame();
+            }
+
+            if(ai.PointAI.x == 0 && ai.PointAI.y == 1){
+                btn2.setText("O");
+                btn2.setEnabled(false);
+                ai.mang[ai.PointAI.x][ai.PointAI.y] = ai.giaTri_O;
+                winGame();
+            }
+            if(ai.PointAI.x == 0 && ai.PointAI.y == 2){
+                btn3.setText("O");
+                btn3.setEnabled(false);
+                ai.mang[ai.PointAI.x][ai.PointAI.y] = ai.giaTri_O;
+                winGame();
+            }
+            if(ai.PointAI.x == 1 && ai.PointAI.y == 0){
+                btn4.setText("O");
+                btn4.setEnabled(false);
+                ai.mang[ai.PointAI.x][ai.PointAI.y] = ai.giaTri_O;
+                winGame();
+            }
+            if(ai.PointAI.x == 1 && ai.PointAI.y == 1){
+                btn5.setText("O");
+                btn5.setEnabled(false);
+                ai.mang[ai.PointAI.x][ai.PointAI.y] = ai.giaTri_O;
+                winGame();
+            }
+            if(ai.PointAI.x == 1 && ai.PointAI.y == 2){
+                btn6.setText("O");
+                btn6.setEnabled(false);
+                ai.mang[ai.PointAI.x][ai.PointAI.y] = ai.giaTri_O;
+                winGame();
+            }
+            if(ai.PointAI.x == 2 && ai.PointAI.y == 0){
+                btn7.setText("O");
+                btn7.setEnabled(false);
+                ai.mang[ai.PointAI.x][ai.PointAI.y] = ai.giaTri_O;
+                winGame();
+            }if(ai.PointAI.x == 2 && ai.PointAI.y == 1){
+                btn8.setText("O");
+                btn8.setEnabled(false);
+                ai.mang[ai.PointAI.x][ai.PointAI.y] = ai.giaTri_O;
+                winGame();
+            }
+            if(ai.PointAI.x == 2 && ai.PointAI.y == 2){
+                btn9.setText("O");
+                btn9.setEnabled(false);
+                ai.mang[ai.PointAI.x][ai.PointAI.y] = ai.giaTri_O;
+                winGame();
+            }
+        }
+        //winGame();
+        //ai.khoiTao();
+       }
+       else{
+        dem++;
+        if(dem == 1 || dem == 3 || dem == 5 ||  dem == 7 || dem == 9){
+            first_Click = "X";
+        }
+        else if(dem == 2 || dem == 4 || dem == 6 || dem == 8){
+            first_Click = "O";
+        }
+        
+        if(e.getSource() == btn1){
+            //System.out.println("x: "+btn1.getX()+"    y:"+ btn1.getY());
+            btn1.setText(first_Click);      // Xét quân cờ xem đánh X hay O
+            btn1.setEnabled(false);         // Sau khi đánh thì xét cho button tắt để không thể nhấn lần 2
+            winGame();                      // kiểm tra X hay O win hay hòa cờ 
+            //inmang();
+            
+        }
+        if(e.getSource() == btn2){
+            //System.out.println("x: "+btn2.getX()+"    y:"+ btn2.getY());
+
+            btn2.setText(first_Click);
+            btn2.setEnabled(false);
+            winGame();
+
+            //inmang();
+        }
+        if(e.getSource() == btn3){
+            //System.out.println("x: "+btn3.getX()+"    y:"+ btn3.getY());
+
+            btn3.setText(first_Click);
+            btn3.setEnabled(false);
+            winGame();
+            //inmang();
+        }
+        if(e.getSource() == btn4){
+            //System.out.println("x: "+btn4.getX()+"    y:"+ btn4.getY());
+
+            btn4.setText(first_Click);
+            btn4.setEnabled(false);
+            winGame();
+            //inmang();
+        }
+        if(e.getSource() == btn5){
+            //System.out.println("x: "+btn5.getX()+"    y:"+ btn5.getY());
+
+            btn5.setText(first_Click);
+            btn5.setEnabled(false);
+            winGame();
+            //inmang();
+        }
+        if(e.getSource() == btn6){
+            //System.out.println("x: "+btn6.getX()+"    y:"+ btn6.getY());
+
+            btn6.setText(first_Click);
+            btn6.setEnabled(false);
+            winGame();
+            //inmang();
+        }
+        if(e.getSource() == btn7){
+            //System.out.println("x: "+btn7.getX()+"    y:"+ btn7.getY());
+            btn7.setText(first_Click);
+            btn7.setEnabled(false);
+            winGame();
+            //inmang();
+            //btn7.setEnabled(true);
+        }
+        if(e.getSource() == btn8){
+            //System.out.println("x: "+btn8.getX()+"    y:"+ btn8.getY());
+            btn8.setText(first_Click);
+            btn8.setEnabled(false);
+            winGame();
+            //inmang();
+        }
+        if(e.getSource() == btn9){
+            //System.out.println("x: "+btn9.getX()+"    y:"+ btn9.getY());
+            btn9.setText(first_Click);
+            btn9.setEnabled(false);
+            winGame();
+            //inmang();
+
+        }
+       }
+    }
+    
+    public void winGame(){
+        kq = 1;
+        List<Point> ds = ai.danhsach();
+        String b1 = btn1.getText();
+        String b2 = btn2.getText();
+        String b3 = btn3.getText();
+        String b4 = btn4.getText();
+        String b5 = btn5.getText();
+        String b6 = btn6.getText();
+        String b7 = btn7.getText();
+        String b8 = btn8.getText();
+        String b9 = btn9.getText();
+        if(b1 == "X" && b2 == "X" && b3 == "X" || b4 == "X" && b5 == "X" && b6 == "X" || b7 == "X" && b8 == "X" && b9 == "X" || b1 == "X" && b5 == "X" && b9 == "X" || b7 == "X" && b5 == "X" && b3 == "X" || b1 == "X" && b4 == "X" && b7 == "X" || b2 == "X" && b5 == "X" && b8 == "X" || b3 == "X" && b6 == "X" && b9 == "X"){
+            JOptionPane.showMessageDialog(rootPane, "Người chơi X win");
+            kq = 0;
+            int choiLai = JOptionPane.showConfirmDialog(rootPane, "Bạn có muốn chơi lại", "Chơi lại",  JOptionPane.YES_NO_OPTION);
+            if(choiLai == JOptionPane.YES_OPTION){
+                Reset();  
+            }
+        }
+        else if(b1 == "O" && b2 == "O" && b3 == "O" || b4 == "O" && b5 == "O" && b6 == "O" || b7 == "O" && b8 == "O" && b9 == "O" || b1 == "O" && b5 == "O" && b9 == "O" || b7 == "O" && b5 == "O" && b3 == "O" || b1 == "O" && b4 == "O" && b7 == "O" || b2 == "O" && b5 == "O" && b8 == "O" || b3 == "O" && b6 == "O" && b9 == "O"){
+            JOptionPane.showMessageDialog(rootPane, "Người chơi O win");
+            kq = 0;
+            int choiLai = JOptionPane.showConfirmDialog(rootPane, "Bạn có muốn chơi lại", "Chơi lại",  JOptionPane.YES_NO_OPTION);
+            if(choiLai == JOptionPane.YES_OPTION){
+                Reset();
+            }
+        }
+        else if(ds.isEmpty()){
+            JOptionPane.showMessageDialog(rootPane, "Hòa cờ");
+            kq = 0;
+            int choiLai = JOptionPane.showConfirmDialog(rootPane, "Bạn có muốn chơi lại", "Chơi Lại", JOptionPane.YES_NO_OPTION);
+            if(choiLai == JOptionPane.YES_OPTION){
+                Reset();
+            }
+        }
+    }
+    
+//    public void inmang(){
+//        for(int d=0; d<3; d++){
+//            for(int l=0; l<3; l++)
+//                System.out.printf("%d ",btn[d][l]);
+//            System.out.println("");
+//        }
+//    }
+    
+//    public void setGiatri(int k, Boolean check_x){
+//        if(check_x){
+//            btn[k / 3][k %3 ] = 1;
+//        }
+//        else btn[k/3][k%3] = -1;
+//        
+//    }
+    
+    public void Reset(){
+        new TicTacToe();
+//        btn1.setText(null);
+//        btn2.setText(null);
+//        btn3.setText(null);
+//        btn4.setText(null);
+//        btn5.setText(null);
+//        btn6.setText(null);
+//        btn7.setText(null);
+//        btn8.setText(null);
+//        btn9.setText(null);
+//        
+//        btn1.setEnabled(true);
+//        btn2.setEnabled(true);
+//        btn3.setEnabled(true);
+//        btn4.setEnabled(true);
+//        btn5.setEnabled(true);
+//        btn6.setEnabled(true);
+//        btn7.setEnabled(true);
+//        btn8.setEnabled(true);
+//        btn9.setEnabled(true);
+//        
+//        dem = 0;
+    }
+//        for(int i = 1; i <= 9; i++){
+//                String Tam;
+//                Tam = btn[i].getText();}
+//        else if(Tam != null){
+//                
+//            JOptionPane.showMessageDialog(rootPane, "Hòa cờ");
+//            
+//        }
+    
+//    public boolean wingame(){
+//        if(winGame() == true){
+//            
+//        }
+//    }
+    
+//    public boolean chuaDanh(){
+//        for(int i = 1; i <= 9; i++){
+//            boolean[] btn = null;
+//            if(btn[i])
+//        }
+//        return true;
+//    } 
+//    public void hienBtn(){
+//        for(int i = 1; i <= 9; i++){
+//            btn[i].setEnabled(false);
+//        }
+//    }
+    
+    
+    
+    public static void main(String []agrs){
+        new TicTacToe();
+    }
 }
+
 
